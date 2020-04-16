@@ -1,0 +1,17 @@
+version: '3.1'
+
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_MULTIPLE_DATABASES: user_app_db,test_user_app_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    #docker exec -it zio-onion_walletv2db_1 psql -U postgres
+    #ALTER ROLE postgres WITH PASSWORD 'wallet';
+    #CREATE DATABASE walletdb_v2;
+    ports:
+      - "5432:5432"
+    volumes:
+      - $PWD/docker/pgdata:/var/lib/postgresql/data
+      - $PWD/docker/scripts/create-databases.sh:/docker-entrypoint-initdb.d/init.sh

@@ -3,6 +3,9 @@
 .bloop/
 .bloop
 
+
+docker/data/
+
 project/metals.sbt
 
 # sbt
