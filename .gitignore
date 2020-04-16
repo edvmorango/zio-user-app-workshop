@@ -1,0 +1,48 @@
+.env
+
+.bloop/
+.bloop
+
+project/metals.sbt
+
+# sbt
+# (may want to keep parts of 'project')
+bin/
+#project/
+target/
+build/
+
+docker/
+#metals
+.metals
+.metals/*
+.metals/
+
+# eclipse
+build
+.classpath
+.project
+.settings
+.worksheet
+
+# intellij idea
+*.log
+*.iml
+*.ipr
+*.iws
+.ideas
+.idea/workspace.xml
+.idea/usage.statistics.xml
+.idea/task.xml
+
+# mac
+.DS_Store
+
+# other?
+.history
+.scala_dependencies
+.cache
+.cache-com.br.caju.main
+#general
+*.class
+
