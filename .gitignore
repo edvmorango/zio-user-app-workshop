@@ -15,7 +15,7 @@ bin/
 target/
 build/
 
-docker/
+
 #metals
 .metals
 .metals/*
