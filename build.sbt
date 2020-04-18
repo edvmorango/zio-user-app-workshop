@@ -56,6 +56,8 @@ libraryDependencies ++= Seq(
   "dev.zio"                      %% "zio-kafka"                     % zioKafkaVersion,
   "dev.zio"                      %% "zio-config"                    % zioConfigVersion,
   "dev.zio"                      %% "zio-config-magnolia"           % zioConfigVersion,
+  "dev.zio"                      %% "zio-config-typesafe"           % zioConfigVersion,
+
   "io.scalaland"                 %% "chimney"                       % chimneyVersion,
 
   "io.chrisdavenport"            %% "fuuid"                         % fuuidVersion,
