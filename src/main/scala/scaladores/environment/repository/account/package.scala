@@ -8,6 +8,10 @@ import zio.clock._
 import zio.{Has, ZIO, ZLayer}
 import zio.interop.catz._
 import io.scalaland.chimney.dsl._
+import scaladores.failure.repository.AccountRepositoryFailure.{
+  AccountRepositoryInsertFailure,
+  AccountRepositoryNotFound
+}
 package object account {
 
   type AccountRepository = Has[AccountRepository.Service]
@@ -47,14 +51,15 @@ package object account {
               _         <- create(account, createdAt).run.transact(xa)
             } yield ()
 
-            pipeline.provide(env)
+            pipeline
+              .mapError(t => AccountRepositoryInsertFailure(t.getMessage))
+              .provide(env)
 
           }
 
           override def findByUuid(uuid: UUID): ZIO[Any, Throwable, Account] = {
 
-            sql"""
-                   | SELECT ( 
+            sql""" | SELECT (
                    |  uuid,
                    |  document,
                    |  createdAt
@@ -64,10 +69,12 @@ package object account {
               .query[AccountRow]
               .to[List]
               .transact(env.get[DBTransactor.Resource].xa)
-              .flatMap(_.headOption match {
-                case None    => ZIO.fail(new Exception("COULDNT FIND USER"))
-                case Some(w) => ZIO.succeed(w.into[Account].transform)
-              })
+              .flatMap {
+                _.headOption match {
+                  case None    => ZIO.fail(AccountRepositoryNotFound)
+                  case Some(w) => ZIO.succeed(w.into[Account].transform)
+                }
+              }
 
           }
 
@@ -83,10 +90,12 @@ package object account {
               .query[AccountRow]
               .to[List]
               .transact(env.get[DBTransactor.Resource].xa)
-              .flatMap(_.headOption match {
-                case None    => ZIO.fail(new Exception("COULDNT FIND USER BY DOCUMENT"))
-                case Some(w) => ZIO.succeed(w.into[Account].transform)
-              })
+              .flatMap {
+                _.headOption match {
+                  case None    => ZIO.fail(AccountRepositoryNotFound)
+                  case Some(w) => ZIO.succeed(w.into[Account].transform)
+                }
+              }
           }
 
         }
@@ -94,4 +103,5 @@ package object account {
       }
 
   }
+
 }
