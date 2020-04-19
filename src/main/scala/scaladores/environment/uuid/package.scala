@@ -3,7 +3,7 @@ package scaladores.environment
 import java.util
 
 import io.chrisdavenport.fuuid.FUUID
-import zio.{Has, Task, ZIO, ZLayer}
+import zio.{Has, Layer, Task, ZIO, ZLayer}
 import zio.interop.catz._
 
 package object uuid {
@@ -18,7 +18,7 @@ package object uuid {
 
     }
 
-    val live = ZLayer.succeed(new Service {
+    val live: Layer[Nothing, UUID] = ZLayer.succeed(new Service {
       override def genUuid: ZIO[Any, Nothing, util.UUID] = FUUID.randomFUUID[Task].map(FUUID.Unsafe.toUUID).orDie
     })
 

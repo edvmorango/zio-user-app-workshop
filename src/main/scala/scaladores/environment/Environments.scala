@@ -12,4 +12,7 @@ object Environments {
 
   type AccountEnvironment = GlobalEnvironment with DBTransactor with AccountRepository
 
+  type AppEnvironment =
+    Blocking with Clock with UUID with DBTransactor with AccountRepository
+
 }
