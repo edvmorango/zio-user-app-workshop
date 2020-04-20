@@ -22,7 +22,7 @@ package object account {
 
     trait Service {
 
-      def create(account: Account): ZIO[LayerEnv, Throwable, Unit]
+      def create(account: Account): ZIO[Any, Throwable, Unit]
 
       def findByUuid(uuid: UUID): ZIO[Any, Throwable, Account]
 

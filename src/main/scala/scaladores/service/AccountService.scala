@@ -12,10 +12,9 @@ object AccountService {
 
   def createAccount(command: CreateAccountCommand): ZIO[AccountEnvironment, AccountFailure, Account] = ZIO.accessM {
     env =>
-      val pipeline = for {
+      val pipeline: ZIO[AccountEnvironment, Nothing, Account] = for {
         account <- genUuid.map(uuid => command.into[Account].withFieldConst(_.uuid, uuid).transform)
         _       <- env.get[AccountRepository.Service].create(account).orDie
-
       } yield account
 
       pipeline

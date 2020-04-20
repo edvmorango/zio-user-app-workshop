@@ -17,7 +17,8 @@ object Environments {
 
   val repository = Layers.databaseConfig >>> (global ++ DBTransactor.live) >>> AccountRepository.live
 
-  val fakeEnv = global ++ repository ++ (config >>> DBTransactor.live)
+  val fakeEnv: ZLayer[Any, Nothing, Blocking with Clock with UUID with AccountRepository] =
+    global ++ repository
 
   val cleanAndMigrate = (for {
     flyway <- config.build
