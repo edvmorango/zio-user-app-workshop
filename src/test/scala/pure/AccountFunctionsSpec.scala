@@ -1,0 +1,3 @@
+package pure
+
+class AccountFunctionsSpec {}
