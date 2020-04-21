@@ -7,12 +7,14 @@ import scaladores.domain.{Account, CreateAccountCommand}
 import scaladores.endpoint.r.{AccountResponse, CreateAccountCommandRequest}
 import scaladores.endpoint.support.JSONSupport
 import scaladores.environment.Environments.AccountEnvironment
+import scaladores.environment.uuid.UUID
 import scaladores.failure.AccountFailure
 import scaladores.failure.AccountFailure._
 import scaladores.service.AccountService._
 import zio.interop.catz._
 import zio.{RIO, ZIO}
-
+import cats.implicits._
+import zio.logging._
 class AccountEndpoint[R <: AccountEnvironment](root: String) extends JSONSupport[R] {
 
   type AccountTask[A] = RIO[R, A]
@@ -46,8 +48,15 @@ class AccountEndpoint[R <: AccountEnvironment](root: String) extends JSONSupport
 
     case req @ POST -> Root / `root` =>
       val pipeline = for {
+
         request <- req.as[CreateAccountCommandRequest].mapError(t => AccountParsingFailure(t.getMessage))
-        account <- createAccount(request.into[CreateAccountCommand].transform)
+
+        correlationUuid <- ZIO.accessM[UUID](_.get[UUID.Service].genUuid)
+
+        account <- log.locally(LogAnnotation.CorrelationId(correlationUuid.some)) {
+                    createAccount(
+                      request.into[CreateAccountCommand].withFieldConst(_.correlationUuid, correlationUuid).transform)
+                  }
       } yield account
 
       pipeline

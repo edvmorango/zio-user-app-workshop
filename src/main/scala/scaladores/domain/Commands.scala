@@ -1,3 +1,5 @@
 package scaladores.domain
 
-case class CreateAccountCommand(document: String)
+import java.util.UUID
+
+case class CreateAccountCommand(correlationUuid: UUID, document: String)
