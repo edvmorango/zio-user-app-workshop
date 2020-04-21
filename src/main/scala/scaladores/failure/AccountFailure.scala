@@ -8,13 +8,16 @@ sealed trait AccountFailure
 
 object AccountFailure {
 
-  case class AccountRepositoryFailure(f: AccountRepositoryFailure) extends AccountFailure
+  case class AccountDocumentAlreadyExistsFailure(document: String) extends AccountFailure
 
-  implicit val EncoderAccountRepositoryFailure: Encoder[AccountRepositoryFailure] =
-    deriveEncoder[AccountRepositoryFailure]
+  case object AccountNotFoundFailure extends AccountFailure
+
+  implicit val EncoderAccountDocumentAlreadyExistsFailure: Encoder[AccountDocumentAlreadyExistsFailure] =
+    deriveEncoder[AccountDocumentAlreadyExistsFailure]
 
   implicit val EncoderAccountFailure: Encoder[AccountFailure] = Encoder.instance[AccountFailure] {
-    case f: AccountRepositoryFailure => f.asJson
+    case f: AccountDocumentAlreadyExistsFailure => f.asJson
+    case AccountNotFoundFailure                 => AccountNotFoundFailure.productPrefix.asJson
   }
 
 }

@@ -2,9 +2,13 @@ package service
 
 import envs.Environments._
 import generators.Commands._
+import scaladores.environment.Environments.AccountEnvironment
+import scaladores.failure.AccountFailure
+import scaladores.failure.AccountFailure.AccountDocumentAlreadyExistsFailure
 import scaladores.service.AccountService._
+import zio.ZIO
 import zio.test.Assertion._
-import zio.test.TestAspect._
+import zio.test.TestAspect.{before, _}
 import zio.test._
 
 object AccountServiceSpec extends DefaultRunnableSpec {
@@ -13,9 +17,24 @@ object AccountServiceSpec extends DefaultRunnableSpec {
     suite("AccountServiceSpec")(
       testM("should create an account for a valid CreateAccountCommand") {
         checkAllM(anyCreateAccountCommand) { (command) =>
-          val pipeline = createAccount(command)
-          assertM(pipeline.map(_.document))(equalTo(command.document)).provideLayer(fakeEnv)
+          val pipeline = for {
+            account      <- createAccount(command)
+            foundAccount <- findByDocument(command.document)
+          } yield account == foundAccount
+
+          assertM(pipeline)(isTrue).provideLayer(fakeEnv)
         }
-      } @@ before(cleanAndMigrate)
-    ) @@ after(cleanAndMigrate)
+      },
+      testM("should fail to create an account when the document already exists ") {
+        checkAllM(anyCreateAccountCommand) { (command) =>
+          val pipeline: ZIO[AccountEnvironment, AccountFailure, Unit] = for {
+            _ <- createAccount(command)
+            _ <- createAccount(command)
+          } yield ()
+
+          assertM(pipeline.either)(isLeft(equalTo(AccountDocumentAlreadyExistsFailure(command.document))))
+            .provideLayer(fakeEnv)
+        }
+      }
+    ) @@ sequential @@ before(cleanAndMigrate)
 }

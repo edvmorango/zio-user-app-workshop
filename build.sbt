@@ -53,7 +53,7 @@ val logbackVersion = "1.2.3"
 libraryDependencies ++= Seq(
   "dev.zio"                      %% "zio"                           % zioVersion,
   "dev.zio"                      %% "zio-streams"                   % zioVersion,
-  "dev.zio"                      %% "zio-logging"                   % zioLoggingVersion,
+  "dev.zio"                      %% "zio-logging-slf4j"                   % zioLoggingVersion,
   "dev.zio"                      %% "zio-interop-cats"              % zioInteropCats,
   "dev.zio"                      %% "zio-kafka"                     % zioKafkaVersion,
   "dev.zio"                      %% "zio-config"                    % zioConfigVersion,

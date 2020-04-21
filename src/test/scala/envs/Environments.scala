@@ -7,17 +7,20 @@ import scaladores.environment.repository.account._
 import scaladores.environment.uuid.UUID
 import zio.blocking._
 import zio.clock._
+import zio.logging.Logging
 import zio.{ZIO, ZLayer}
 
 object Environments {
 
   val config = Layers.databaseConfig ++ Layers.httpServer
 
-  val global: ZLayer[Any, Nothing, Blocking with Clock with UUID] = Blocking.live ++ Clock.live ++ UUID.live
+  val global
+    : ZLayer[Any, Nothing, Blocking with Clock with UUID with Logging] = Blocking.live ++ Clock.live ++ UUID.live ++ scaladores.environment.Environments.logger
 
-  val repository = Layers.databaseConfig >>> (global ++ DBTransactor.live) >>> AccountRepository.live
+  val repository
+    : ZLayer[Any, Nothing, AccountRepository] = Layers.databaseConfig >>> (global ++ DBTransactor.live) >>> AccountRepository.live
 
-  val fakeEnv: ZLayer[Any, Nothing, Blocking with Clock with UUID with AccountRepository] =
+  val fakeEnv: ZLayer[Any, Nothing, Blocking with Clock with UUID with Logging with AccountRepository] =
     global ++ repository
 
   val cleanAndMigrate = (for {
