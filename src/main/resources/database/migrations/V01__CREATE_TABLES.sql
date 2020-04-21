@@ -23,13 +23,13 @@ CREATE TABLE person(
 );
 
 CREATE TABLE event(
-  uuid UUID,
-  serial INTEGER NOT NULL,
+  uuid UUID PRIMARY KEY ,
   correlation_uuid UUID NOT NULL,
+  serial INTEGER NOT NULL,
   account_uuid UUID NOT NULL,
   body JSON NOT NULL,
   created_at TIMESTAMP NOT NULL,
-  PRIMARY KEY (uuid, serial)
+  UNIQUE(correlation_uuid, serial)
 );
 
 ALTER TABLE account_info
