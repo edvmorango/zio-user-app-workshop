@@ -9,6 +9,7 @@ import org.http4s.{Request, Response}
 import scaladores.environment.Environments.AppEnvironment
 import scaladores.environment.config.HttpServerConfig
 import zio.interop.catz._
+import cats.implicits._
 import zio.{Has, RIO, ZIO}
 
 object Server {
@@ -19,7 +20,9 @@ object Server {
 
     val healthEndpoint = new HealthEndpoint[AppEnvironment]("health").endpoints
 
-    val openEndpoints = healthEndpoint
+    val accountEndpoint = new AccountEndpoint[AppEnvironment]("account").endpoints
+
+    val openEndpoints = healthEndpoint <+> accountEndpoint
 
     Router[ServerRIO](basePath -> openEndpoints).orNotFound
 

@@ -24,7 +24,7 @@ object Environments {
   type AccountEnvironment = GlobalEnvironment with AccountRepository
 
   type AppEnvironment =
-    Clock with Blocking with UUID with Logging with Consumer with Producer[Any, util.UUID, Json]
+    Clock with Blocking with UUID with Logging with Consumer with Producer[Any, util.UUID, Json] with AccountRepository
 
   val logger: ZLayer[Any, Nothing, Logging] = Slf4jLogger.make((context, message) =>
     s"[correlationId = ${LogAnnotation.CorrelationId.render(context.get(LogAnnotation.CorrelationId))}] $message")
@@ -42,9 +42,11 @@ object Environments {
 
   val accountEnvironment: ZLayer[Any, Nothing, AccountEnvironment] = global ++ accountRepository
 
-  val appEnvironment: ZLayer[
-    Any,
-    Nothing,
-    Clock with Blocking with UUID with Logging with Consumer with Producer[Any, util.UUID, Json]] = global ++ messaging
+  val appEnvironment: ZLayer[Any,
+                             Nothing,
+                             Blocking with Clock with UUID with Logging with Consumer with Producer[
+                               Any,
+                               util.UUID,
+                               Json] with AccountRepository] = global ++ messaging ++ accountRepository
 
 }
