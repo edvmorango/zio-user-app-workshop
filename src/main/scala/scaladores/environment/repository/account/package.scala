@@ -62,7 +62,7 @@ package object account {
           override def findByUuid(uuid: UUID): ZIO[Any, AccountRepositoryFailure, Account] = {
 
             sql""" | SELECT
-                   |  uuid :: uuid,
+                   |  uuid,
                    |  document,
                    |  created_at
                    | FROM account

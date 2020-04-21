@@ -7,7 +7,8 @@ import zio.test.Gen
 object Commands {
 
   val anyCreateAccountCommand: Gen[Random, CreateAccountCommand] = for {
-    document <- Gen.long(11111111111L, 99999999999L).map(_.toString)
-  } yield CreateAccountCommand(document)
+    document        <- Gen.long(11111111111L, 99999999999L).map(_.toString)
+    correlationUuid <- Gen.anyUUID
+  } yield CreateAccountCommand(correlationUuid, document)
 
 }

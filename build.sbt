@@ -7,6 +7,7 @@ scalaVersion := "2.13.1"
 resolvers += Resolver.mavenCentral
 resolvers += Resolver.jcenterRepo
 
+
 scalacOptions ++= Seq(
   "-language:higherKinds",
   "-deprecation",
@@ -84,5 +85,5 @@ libraryDependencies ++= Seq(
   "dev.zio"                      %% "zio-test-sbt"                  % zioVersion              % "test"
 )
 
-
 testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework"))
+parallelExecution in Test := false

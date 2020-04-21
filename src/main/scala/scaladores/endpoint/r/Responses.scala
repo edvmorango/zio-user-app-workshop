@@ -2,7 +2,7 @@ package scaladores.endpoint.r
 
 import java.util._
 
-import io.circe.Encoder
+import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto._
 
 case class HealthResponse(status: String)
@@ -15,4 +15,6 @@ case class AccountResponse(uuid: UUID, document: String)
 
 object AccountResponse {
   implicit val AccountResponseEncoder: Encoder[AccountResponse] = deriveEncoder[AccountResponse]
+  implicit val AccountResponseDecoder: Decoder[AccountResponse] = deriveDecoder[AccountResponse]
+
 }

@@ -15,14 +15,13 @@ object AccountService {
   def createAccount(command: CreateAccountCommand): ZIO[AccountEnvironment, AccountFailure, Account] = ZIO.accessM {
     env =>
       val pipeline: ZIO[AccountEnvironment, AccountFailure, Account] = for {
-
         _ <- ZIO.fromEither(validateDocumentSize(command).flatMap(validateDocumentCharacters))
         _ <- env
               .get[AccountRepository.Service]
               .findByDocument(command.document)
               .flip
               .mapError(a => AccountDocumentAlreadyExistsFailure(a.document))
-              .tapError(_ => log.debug("USER ALREADY EXISTS"))
+              .tapError(_ => log.debug("ACCOUNT ALREADY EXISTS"))
 
         account <- genUuid.map(uuid => command.into[Account].withFieldConst(_.uuid, uuid).transform)
         _ <- env
