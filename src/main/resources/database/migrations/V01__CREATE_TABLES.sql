@@ -19,7 +19,8 @@ CREATE TABLE person(
   current  BOOLEAN NOT NULL,
   full_name VARCHAR(100) NOT NULL,
   birth_date DATE  NOT NULL,
-  created_at TIMESTAMP NOT NULL
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP
 );
 
 CREATE TABLE event(
