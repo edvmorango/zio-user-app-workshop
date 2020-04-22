@@ -12,7 +12,7 @@
     <logger name="org.http4s.blaze" level="WARN"/>
     <logger name="org.flywaydb" level="OFF"/>
 
-    <root level="INFO, DEBUG">
+    <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>
 

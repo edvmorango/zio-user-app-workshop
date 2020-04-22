@@ -1,6 +1,7 @@
 package scaladores.service
 
 import io.scalaland.chimney.dsl._
+import scaladores.domain.EventContent.AccountCreatedEvent
 import scaladores.domain.{Account, CreateAccountCommand}
 import scaladores.environment.Environments.AccountEnvironment
 import scaladores.environment.repository.account.AccountRepository
@@ -27,6 +28,11 @@ object AccountService {
         _ <- env
               .get[AccountRepository.Service]
               .create(account)
+              .orDie
+
+        _ <- EventService
+              .emitEvent(account.uuid, command.correlationUuid, AccountCreatedEvent(account))
+              .mapError(e => new Exception(e.toString))
               .orDie
       } yield account
 

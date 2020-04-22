@@ -12,10 +12,10 @@ object AccountRepositoryFailure {
 
   case object AccountRepositoryNotFound extends AccountRepositoryFailure
 
-  implicit val EncoderAccountRepositoryInsertFailure: Encoder[AccountRepositoryInsertFailure] =
+  implicit val AccountRepositoryInsertFailureEncoder: Encoder[AccountRepositoryInsertFailure] =
     deriveEncoder[AccountRepositoryInsertFailure]
 
-  implicit val EncoderAccountRepositoryFailure: Encoder[AccountRepositoryFailure] =
+  implicit val AccountRepositoryFailureEncoder: Encoder[AccountRepositoryFailure] =
     Encoder.instance[AccountRepositoryFailure] {
       case f: AccountRepositoryInsertFailure => f.asJson
       case AccountRepositoryNotFound         => AccountRepositoryNotFound.productPrefix.asJson

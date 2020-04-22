@@ -9,23 +9,24 @@ import scaladores.environment.config._
 import scaladores.environment.messaging.producer
 import scaladores.environment.repository.DBTransactor
 import scaladores.environment.repository.account._
+import scaladores.environment.repository.event.EventRepository
 import scaladores.environment.uuid.UUID
 import zio.blocking._
 import zio.clock._
 import zio.kafka.consumer.Consumer
 import zio.kafka.producer.Producer
 import zio.logging.Logging
-import zio.{ZIO, ZLayer}
-
+import zio.{URIO, ZIO, ZLayer}
+import scaladores.environment.Environments.global
 object Environments {
 
   val config = Layers.databaseConfig ++ Layers.httpServer ++ Layers.messagingConfig
 
-  val global
-    : ZLayer[Any, Nothing, Blocking with Clock with UUID with Logging] = Blocking.live ++ Clock.live ++ UUID.live ++ scaladores.environment.Environments.logger
-
-  val repository
+  val accountRepository
     : ZLayer[Any, Nothing, AccountRepository] = Layers.databaseConfig >>> (global ++ DBTransactor.live) >>> AccountRepository.live
+
+  val eventRepository
+    : ZLayer[Any, Nothing, EventRepository] = Layers.databaseConfig >>> (global ++ DBTransactor.live) >>> EventRepository.live
 
   val messaging
     : ZLayer[Any, Nothing, Consumer with Producer[Any, util.UUID, Json]] = (Clock.live ++ Blocking.live ++ Layers.messagingConfig) >>> (environment.messaging.consumer ++ producer)
@@ -33,9 +34,9 @@ object Environments {
   val fakeEnv: ZLayer[
     Any,
     Nothing,
-    Clock with Blocking with UUID with Logging with Consumer with Producer[Any, util.UUID, Json] with AccountRepository] = global ++ messaging ++ repository
+    Clock with Blocking with UUID with Logging with Consumer with Producer[Any, util.UUID, Json] with AccountRepository with EventRepository] = global ++ messaging ++ accountRepository ++ eventRepository
 
-  val cleanAndMigrate = (for {
+  val cleanAndMigrate: URIO[Any, Flyway] = (for {
     flyway <- config.build
                .map(_.get[DatabaseConfig])
                .use { db =>

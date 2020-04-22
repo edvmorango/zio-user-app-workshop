@@ -9,11 +9,15 @@ import io.circe.syntax._
 import cats.syntax.functor._
 
 case class Event(uuid: UUID,
+                 serial: Int,
                  correlationUuid: UUID,
-                 serial: Long,
                  accountUuid: UUID,
                  createdAt: OffsetDateTime,
-                 body: EventContent)
+                 body: EventContent) { self =>
+
+  final def json = self.asJson
+
+}
 
 object Event {
 
