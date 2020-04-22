@@ -1,19 +1,21 @@
 package scaladores.app
 
-import scaladores.environment.config._
-import zio.{App, Has, ZIO}
+import scaladores.consumer.AccountConsumer
+import scaladores.endpoint.Server
+import scaladores.environment.Environments._
+import scaladores.environment.config.Layers._
+import zio.{App, ZIO}
 
 object Main extends App {
 
   override def run(args: List[String]): ZIO[zio.ZEnv, Nothing, Int] = {
 
-    for {
-      _ <- ZIO
-            .accessM[Has[DatabaseConfig]] { e =>
-              ZIO.effectTotal(println(e.get[DatabaseConfig]))
-            }
-            .provideLayer(Layers.databaseConfig)
+    val pipeline: ZIO[Any, Nothing, Int] = for {
+      _ <- AccountConsumer.pipeline.provideLayer(appEnvironment).fork
+      _ <- Server.runServer.provideLayer(httpServer ++ appEnvironment)
     } yield 1
+
+    pipeline
 
   }
 

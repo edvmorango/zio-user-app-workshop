@@ -1,5 +1,6 @@
 version: '3.1'
 
+
 services:
   postgres:
     image: postgres
@@ -7,11 +8,44 @@ services:
       POSTGRES_MULTIPLE_DATABASES: user_app_db,test_user_app_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    #docker exec -it zio-onion_walletv2db_1 psql -U postgres
-    #ALTER ROLE postgres WITH PASSWORD 'wallet';
-    #CREATE DATABASE walletdb_v2;
     ports:
       - "5432:5432"
     volumes:
       - $PWD/docker/data/pgdata:/var/lib/postgresql/data
       - $PWD/docker/scripts/create-databases.sh:/docker-entrypoint-initdb.d/init.sh
+
+
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    ports:
+      - '2181:2181'
+    environment:
+      - ZOO_ENABLE_AUTH=yes
+      - ZOO_SERVER_USERS=kafka
+      - ZOO_SERVER_PASSWORDS=kafka_password
+  kafka:
+    image: 'bitnami/kafka:latest'
+    ports:
+      - '9092:9092'
+      - '29092:29092'
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,PLAINTEXT_HOST://:29092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      - KAFKA_ZOOKEEPER_USER=kafka
+      - KAFKA_ZOOKEEPER_PASSWORD=kafka_password
+    depends_on:
+      - zookeeper
+  kafkahq:
+    image: tchiotludo/kafkahq
+    environment:
+      KAFKAHQ_CONFIGURATION: |
+        kafkahq:
+          connections:
+            docker-kafka-server:
+              properties:
+                bootstrap.servers: "kafka:9092"
+    ports:
+      - 8001:8080

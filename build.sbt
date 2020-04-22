@@ -7,6 +7,7 @@ scalaVersion := "2.13.1"
 resolvers += Resolver.mavenCentral
 resolvers += Resolver.jcenterRepo
 
+
 scalacOptions ++= Seq(
   "-language:higherKinds",
   "-deprecation",
@@ -45,18 +46,21 @@ val circeVersion = "0.13.0"
 val http4sVersion = "0.21.3"
 val doobieVersion = "0.9.0"
 val postgresVersion = "42.2.10"
+val flywayVersion = "6.3.3"
 val logbackVersion = "1.2.3"
+
 
 
 libraryDependencies ++= Seq(
   "dev.zio"                      %% "zio"                           % zioVersion,
   "dev.zio"                      %% "zio-streams"                   % zioVersion,
-  "dev.zio"                      %% "zio-logging"                   % zioLoggingVersion,
+  "dev.zio"                      %% "zio-logging-slf4j"                   % zioLoggingVersion,
   "dev.zio"                      %% "zio-interop-cats"              % zioInteropCats,
   "dev.zio"                      %% "zio-kafka"                     % zioKafkaVersion,
   "dev.zio"                      %% "zio-config"                    % zioConfigVersion,
   "dev.zio"                      %% "zio-config-magnolia"           % zioConfigVersion,
   "dev.zio"                      %% "zio-config-typesafe"           % zioConfigVersion,
+
 
   "io.scalaland"                 %% "chimney"                       % chimneyVersion,
 
@@ -73,6 +77,7 @@ libraryDependencies ++= Seq(
   "org.tpolecat"                 %% "doobie-core"                   % doobieVersion,
   "org.tpolecat"                 %% "doobie-postgres"               % doobieVersion,
   "org.postgresql"               %  "postgresql"                    % postgresVersion,
+  "org.flywaydb"                 % "flyway-core"                    % flywayVersion,
 
   "ch.qos.logback"               %  "logback-classic"               % logbackVersion,
 
@@ -80,5 +85,5 @@ libraryDependencies ++= Seq(
   "dev.zio"                      %% "zio-test-sbt"                  % zioVersion              % "test"
 )
 
-
 testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework"))
+parallelExecution in Test := false
