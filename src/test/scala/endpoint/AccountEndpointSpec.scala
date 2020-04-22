@@ -72,7 +72,7 @@ object AccountEndpointSpec extends DefaultRunnableSpec with JSONSupport[AppEnvir
           pipeline.provideLayer(fakeEnv)
         }
       ),
-      testM("an ivalid POST to /account must return 400")(
+      testM("an invalid POST to /account must return 400")(
         checkAllM(anyCreateAccountCommandRequest) { _ =>
           val pipeline = for {
             res <- endpoint

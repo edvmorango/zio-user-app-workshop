@@ -41,8 +41,8 @@ package object event {
         new Service {
 
           private case class EventRow(uuid: UUID,
-                                      correlationUuid: UUID,
                                       serial: Int,
+                                      correlationUuid: UUID,
                                       accountUuid: UUID,
                                       body: Json,
                                       createdAt: OffsetDateTime)

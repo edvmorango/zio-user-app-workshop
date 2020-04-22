@@ -18,8 +18,11 @@ object EventService {
                 eventContent: EventContent): ZIO[EventEnvironment, EventFailure, Unit] =
     ZIO.accessM { env =>
       val pipeline = for {
-        serial <- env.get[EventRepository.Service].findLatestByCorrelationUuid(correlationUuid).fold(_ => 1, _.serial)
-        now    <- env.get[Clock.Service].currentDateTime.orDie
+        serial <- env
+                   .get[EventRepository.Service]
+                   .findLatestByCorrelationUuid(correlationUuid)
+                   .fold(_ => 1, _.serial + 1)
+        now <- env.get[Clock.Service].currentDateTime.orDie
         newEvent <- env
                      .get[UUID.Service]
                      .genUuid
