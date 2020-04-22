@@ -10,7 +10,7 @@ CREATE TABLE account_info(
   current  BOOLEAN NOT NULL,
   status VARCHAR(100) NOT NULL,
   created_at TIMESTAMP NOT NULL,
-  updated_at TIMESTAMP NULL
+  updated_at TIMESTAMP
 );
 
 CREATE TABLE person(
@@ -18,7 +18,7 @@ CREATE TABLE person(
   account_uuid UUID NOT NULL,
   current  BOOLEAN NOT NULL,
   full_name VARCHAR(100) NOT NULL,
-  birth_date VARCHAR(100) NOT NULL,
+  birth_date DATE  NOT NULL,
   created_at TIMESTAMP NOT NULL
 );
 
