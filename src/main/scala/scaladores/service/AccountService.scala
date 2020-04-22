@@ -29,7 +29,7 @@ object AccountService {
               .get[AccountRepository.Service]
               .create(account)
               .orDie
-
+        _ <- log.info("ACCOUNT CREATED SUCCESSFULLY")
         _ <- EventService
               .emitEvent(account.uuid, command.correlationUuid, AccountCreatedEvent(account))
               .mapError(e => new Exception(e.toString))
