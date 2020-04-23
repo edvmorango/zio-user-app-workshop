@@ -25,4 +25,4 @@ package object config {
     val httpServer: ZLayer[Any, Nothing, Has[HttpServerConfig]]     = appConfig.map(e => Has(e.get[Config].httpServer))
     val messagingConfig: ZLayer[Any, Nothing, Has[MessagingConfig]] = appConfig.map(e => Has(e.get[Config].messaging))
   }
-}
+}`
