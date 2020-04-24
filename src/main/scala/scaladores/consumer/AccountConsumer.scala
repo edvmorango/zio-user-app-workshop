@@ -8,6 +8,7 @@ import zio.ZIO
 import zio.kafka.consumer._
 import zio.kafka.serde.Serde
 import zio.logging._
+import scaladores.domain.EventContent.AccountCreatedEvent
 object AccountConsumer {
 
   type ConsumerEnv = AccountEnvironment
@@ -17,7 +18,7 @@ object AccountConsumer {
     .plainStream(Serde.uuid, jsonSerde)
     .flattenChunks
     .mapMPar(16) { record =>
-      val expr = record.record.value().as[Event] match {
+      val expr = record.record.value().as[Event[AccountCreatedEvent]] match {
         case Right(event) =>
           log.locally(LogAnnotation.CorrelationId(event.correlationUuid.some))(effectPipeline(event))
         case Left(_) =>
@@ -29,7 +30,7 @@ object AccountConsumer {
     .mapM(_.commit)
     .runDrain
 
-  def effectPipeline(event: Event): ZIO[ConsumerEnv, Nothing, Unit] = ZIO.accessM { _ =>
+  def effectPipeline(event: Event[AccountCreatedEvent]): ZIO[ConsumerEnv, Nothing, Unit] = ZIO.accessM { _ =>
     for {
       _ <- log.info(s"EVENT CONSUMED SUCCESSFULLY ${event}")
     } yield ()
