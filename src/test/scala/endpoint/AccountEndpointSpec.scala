@@ -8,15 +8,15 @@ import org.http4s._
 import scaladores.endpoint.Server
 import scaladores.endpoint.Server.ServerRIO
 import scaladores.endpoint.r.AccountResponse
-import scaladores.endpoint.support.JSONSupport
-import scaladores.environment.Environments.{AccountEnvironment, AppEnvironment}
+import scaladores.environment.Environments.AccountEnvironment
 import zio.RIO
 import zio.test.Assertion._
 import zio.test.TestAspect._
 import zio.test._
 import zio.interop.catz._
+import scaladores.endpoint._
 
-object AccountEndpointSpec extends DefaultRunnableSpec with JSONSupport[AppEnvironment] {
+object AccountEndpointSpec extends DefaultRunnableSpec {
 
   private val endpoint: Kleisli[ServerRIO, Request[ServerRIO], Response[ServerRIO]] = Server.createRoutes("/")
 
@@ -53,7 +53,8 @@ object AccountEndpointSpec extends DefaultRunnableSpec with JSONSupport[AppEnvir
                         .run(Request[ServerRIO](Method.POST, Uri.unsafeFromString("/account")).withEntity(request))
             body <- postRes.as[AccountResponse]
             res <- endpoint.run(
-                    Request[ServerRIO](Method.GET, Uri.unsafeFromString(s"/account?document=${body.document}")))
+                    Request[ServerRIO](Method.GET, Uri.unsafeFromString(s"/account?document=${body.document}"))
+                  )
           } yield assert(res.status)(equalTo(Status.Ok))
 
           pipeline.provideLayer(fakeEnv)
@@ -76,13 +77,15 @@ object AccountEndpointSpec extends DefaultRunnableSpec with JSONSupport[AppEnvir
         checkAllM(anyCreateAccountCommandRequest) { _ =>
           val pipeline = for {
             res <- endpoint
-                    .run(Request[ServerRIO](Method.POST, Uri.unsafeFromString("/account"))
-                      .withEntity(Json.obj("arbitrary" -> Json.fromString("arbitrary"))))
+                    .run(
+                      Request[ServerRIO](Method.POST, Uri.unsafeFromString("/account"))
+                        .withEntity(Json.obj("arbitrary" -> Json.fromString("arbitrary")))
+                    )
           } yield assert(res.status)(equalTo(Status.BadRequest))
 
           pipeline.provideLayer(fakeEnv)
         }
-      ),
+      )
     ) @@ sequential @@ before(cleanAndMigrate)
 
 }
