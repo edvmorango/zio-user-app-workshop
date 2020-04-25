@@ -3,12 +3,10 @@ package scaladores.endpoint
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 import scaladores.endpoint.r.HealthResponse
-import scaladores.endpoint.support.JSONSupport
 import zio.RIO
-import zio.clock.Clock
 import zio.interop.catz._
 
-class HealthEndpoint[R <: Clock](root: String) extends JSONSupport[R] {
+class HealthEndpoint[R <: Any](root: String) {
 
   type HealthTask[A] = RIO[R, A]
 

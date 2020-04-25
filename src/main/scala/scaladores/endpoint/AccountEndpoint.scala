@@ -5,7 +5,6 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.{HttpRoutes, Response}
 import scaladores.domain.{Account, CreateAccountCommand}
 import scaladores.endpoint.r.{AccountResponse, CreateAccountCommandRequest}
-import scaladores.endpoint.support.JSONSupport
 import scaladores.environment.Environments.AccountEnvironment
 import scaladores.environment.uuid.UUID
 import scaladores.failure.AccountFailure
@@ -15,7 +14,8 @@ import zio.interop.catz._
 import zio.{RIO, ZIO}
 import cats.implicits._
 import zio.logging._
-class AccountEndpoint[R <: AccountEnvironment](root: String) extends JSONSupport[R] {
+
+class AccountEndpoint[R <: AccountEnvironment](root: String) {
 
   type AccountTask[A] = RIO[R, A]
 
@@ -55,7 +55,8 @@ class AccountEndpoint[R <: AccountEnvironment](root: String) extends JSONSupport
 
         account <- log.locally(LogAnnotation.CorrelationId(correlationUuid.some)) {
                     createAccount(
-                      request.into[CreateAccountCommand].withFieldConst(_.correlationUuid, correlationUuid).transform)
+                      request.into[CreateAccountCommand].withFieldConst(_.correlationUuid, correlationUuid).transform
+                    )
                   }
       } yield account
 
