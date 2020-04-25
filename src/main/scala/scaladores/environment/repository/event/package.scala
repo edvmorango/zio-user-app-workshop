@@ -25,11 +25,11 @@ package object event {
 
     trait Service {
 
-      def saveEvent[A <: EventContent: Encoder: Decoder](event: Event[A]): ZIO[Any, EventRepositoryFailure, Unit]
+      def saveEvent[A <: EventContent: Encoder](event: Event[A]): ZIO[Any, EventRepositoryFailure, Unit]
 
-      def findByUuid[A <: EventContent: Encoder: Decoder](uuid: UUID): ZIO[Any, EventRepositoryFailure, Event[A]]
+      def findByUuid[A <: EventContent: Decoder](uuid: UUID): ZIO[Any, EventRepositoryFailure, Event[A]]
 
-      def findLatestByCorrelationUuid[A <: EventContent: Encoder: Decoder](
+      def findLatestByCorrelationUuid[A <: EventContent: Decoder](
           uuid: UUID
       ): ZIO[Any, EventRepositoryFailure, Event[A]]
 
@@ -52,7 +52,7 @@ package object event {
               createdAt: OffsetDateTime
           )
 
-          override def saveEvent[A <: EventContent: Encoder: Decoder](
+          override def saveEvent[A <: EventContent: Encoder](
               event: Event[A]
           ): ZIO[Any, EventRepositoryFailure, Unit] = {
 
@@ -91,7 +91,7 @@ package object event {
 
           }
 
-          override def findByUuid[A <: EventContent: Encoder: Decoder](
+          override def findByUuid[A <: EventContent: Decoder](
               uuid: UUID
           ): ZIO[Any, EventRepositoryFailure, Event[A]] = {
             sql"""| SELECT
@@ -118,7 +118,7 @@ package object event {
 
           }
 
-          override def findLatestByCorrelationUuid[A <: EventContent: Encoder: Decoder](
+          override def findLatestByCorrelationUuid[A <: EventContent: Decoder](
               uuid: UUID
           ): ZIO[Any, EventRepositoryFailure, Event[A]] = {
             sql"""| SELECT
