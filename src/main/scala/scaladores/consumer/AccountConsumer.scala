@@ -8,6 +8,7 @@ import zio.ZIO
 import zio.kafka.consumer._
 import zio.kafka.serde.Serde
 import zio.logging._
+
 object AccountConsumer {
 
   type ConsumerEnv = AccountEnvironment
@@ -16,14 +17,14 @@ object AccountConsumer {
     .subscribeAnd(Subscription.topics("tp-account"))
     .plainStream(Serde.uuid, jsonSerde)
     .flattenChunks
-    .mapMPar(16) { record =>
-      val expr = record.record.value().as[Event] match {
+    .mapMPar(16) { el =>
+      val expr = el.record.value().as[Event] match {
         case Right(event) =>
           log.locally(LogAnnotation.CorrelationId(event.correlationUuid.some))(effectPipeline(event))
         case Left(_) =>
           ZIO.unit
       }
-      expr.as(record.offset)
+      expr.as(el.offset)
     }
     .aggregateAsync(Consumer.offsetBatches)
     .mapM(_.commit)
