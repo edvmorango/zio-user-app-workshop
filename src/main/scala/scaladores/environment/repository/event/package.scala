@@ -13,6 +13,7 @@ import io.circe.syntax._
 import scaladores.failure.repository.EventRepositoryFailure.{EventRepositoryInsertFailure, EventRepositoryNotFound}
 import zio.clock.Clock
 import zio.interop.catz._
+import io.circe.{Encoder, Decoder}
 
 package object event {
 
@@ -24,11 +25,13 @@ package object event {
 
     trait Service {
 
-      def saveEvent(event: Event): ZIO[Any, EventRepositoryFailure, Unit]
+      def saveEvent[A <: EventContent: Encoder](event: Event[A]): ZIO[Any, EventRepositoryFailure, Unit]
 
-      def findByUuid(uuid: UUID): ZIO[Any, EventRepositoryFailure, Event]
+      def findByUuid[A <: EventContent: Decoder](uuid: UUID): ZIO[Any, EventRepositoryFailure, Event[A]]
 
-      def findLatestByCorrelationUuid(uuid: UUID): ZIO[Any, EventRepositoryFailure, Event]
+      def findLatestByCorrelationUuid[A <: EventContent: Decoder](
+          uuid: UUID
+      ): ZIO[Any, EventRepositoryFailure, Event[A]]
 
     }
 
@@ -40,14 +43,18 @@ package object event {
 
         new Service {
 
-          private case class EventRow(uuid: UUID,
-                                      serial: Int,
-                                      correlationUuid: UUID,
-                                      accountUuid: UUID,
-                                      body: Json,
-                                      createdAt: OffsetDateTime)
+          private case class EventRow(
+              uuid: UUID,
+              serial: Int,
+              correlationUuid: UUID,
+              accountUuid: UUID,
+              body: Json,
+              createdAt: OffsetDateTime
+          )
 
-          override def saveEvent(event: Event): ZIO[Any, EventRepositoryFailure, Unit] = {
+          override def saveEvent[A <: EventContent: Encoder](
+              event: Event[A]
+          ): ZIO[Any, EventRepositoryFailure, Unit] = {
 
             def createEvent(row: EventRow) =
               sql"""| INSERT INTO event (
@@ -72,7 +79,8 @@ package object event {
                     event
                       .into[EventRow]
                       .withFieldComputed(_.body, _.body.asJson)
-                      .transform).run
+                      .transform
+                  ).run
                     .transact(xa)
             } yield ()
 
@@ -83,7 +91,9 @@ package object event {
 
           }
 
-          override def findByUuid(uuid: UUID): ZIO[Any, EventRepositoryFailure, Event] = {
+          override def findByUuid[A <: EventContent: Decoder](
+              uuid: UUID
+          ): ZIO[Any, EventRepositoryFailure, Event[A]] = {
             sql"""| SELECT
                   | uuid,
                   | serial,
@@ -102,13 +112,15 @@ package object event {
                 _.headOption match {
                   case None => ZIO.fail(EventRepositoryNotFound)
                   case Some(w) =>
-                    ZIO.succeed(w.into[Event].withFieldComputed(_.body, _.body.as[EventContent].toOption.get).transform)
+                    ZIO.succeed(w.into[Event[A]].withFieldComputed(_.body, _.body.as[A].toOption.get).transform)
                 }
               }
 
           }
 
-          override def findLatestByCorrelationUuid(uuid: UUID): ZIO[Any, EventRepositoryFailure, Event] = {
+          override def findLatestByCorrelationUuid[A <: EventContent: Decoder](
+              uuid: UUID
+          ): ZIO[Any, EventRepositoryFailure, Event[A]] = {
             sql"""| SELECT
                   | uuid,
                   | serial,
@@ -128,7 +140,9 @@ package object event {
                 _.headOption match {
                   case None => ZIO.fail(EventRepositoryNotFound)
                   case Some(w) =>
-                    ZIO.succeed(w.into[Event].withFieldComputed(_.body, _.body.as[EventContent].toOption.get).transform)
+                    ZIO.succeed(
+                      w.into[Event[A]].withFieldComputed(_.body, _.body.as[A].toOption.get).transform
+                    )
                 }
               }
 

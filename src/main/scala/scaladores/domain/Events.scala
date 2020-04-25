@@ -8,21 +8,19 @@ import io.circe.generic.semiauto._
 import io.circe.syntax._
 import cats.syntax.functor._
 
-case class Event(uuid: UUID,
-                 serial: Int,
-                 correlationUuid: UUID,
-                 accountUuid: UUID,
-                 createdAt: OffsetDateTime,
-                 body: EventContent) { self =>
-
-  final def json = self.asJson
-
-}
+case class Event[A <: EventContent](
+    uuid: UUID,
+    serial: Int,
+    correlationUuid: UUID,
+    accountUuid: UUID,
+    createdAt: OffsetDateTime,
+    body: A
+)
 
 object Event {
 
-  implicit val EventEncoder: Encoder[Event] = deriveEncoder[Event]
-  implicit val EventDecoder: Decoder[Event] = deriveDecoder[Event]
+  implicit def EventEncoder[A <: EventContent: Encoder]: Encoder[Event[A]] = deriveEncoder[Event[A]]
+  implicit def EventDecoder[A <: EventContent: Decoder]: Decoder[Event[A]] = deriveDecoder[Event[A]]
 
 }
 
